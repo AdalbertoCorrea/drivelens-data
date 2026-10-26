@@ -1,0 +1,4 @@
+scope,concessionaire_or_road,uf,official_source,notes
+federal,Concessoes rodoviarias federais (todas as praças ANTT),BR,https://www.gov.br/antt,Localizar a pagina de tarifas de pedagio vigentes e a resolucao de reajuste de cada concessao; enumerar as praças pelo CSV de praças da ANTT (T-TOL-001)
+estadual-SP,Rodovias paulistas concedidas (todas as praças ARTESP),SP,https://www.artesp.sp.gov.br,Localizar a tabela de tarifas vigentes por concessionaria; enumerar as praças pela lista ARTESP (T-TOL-001)
+estadual-SP,Rodovias sob DER-SP com cobranca,SP,https://www.der.sp.gov.br,Confirmar se ha praças fora da ARTESP; preencher so com fonte oficial

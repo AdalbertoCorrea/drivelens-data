@@ -1,0 +1,61 @@
+# Release of the DriveLens toll dataset. Lives at the root of the PUBLIC drivelens-data repository
+# (this folder is that repository's root). Needs the repository secret DRIVELENS_DATA_SIGNING_KEY
+# (Ed25519 private key, PEM). See KEY-ROTATION.md.
+name: release
+
+on:
+  workflow_dispatch:
+    inputs:
+      version:
+        description: "Dataset version (integer, strictly greater than the previous release)"
+        required: true
+      build_date:
+        description: "Build date YYYY-MM-DD"
+        required: true
+
+permissions:
+  contents: write
+
+concurrency: release
+
+jobs:
+  release:
+    runs-on: ubuntu-24.04
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+
+      - name: Unit tests
+        run: python3 -I -m unittest discover -s tests
+
+      - name: Validate (a synthetic dataset is never publishable)
+        run: python3 -I validate.py --require-publishable
+
+      - name: Build dataset
+        run: >
+          python3 -I build.py --version "${{ inputs.version }}" --build-date "${{ inputs.build_date }}"
+          --require-publishable --out tolls_br.bin.gz
+
+      - name: Manifest
+        run: >
+          python3 -I sign_release.py manifest --dataset tolls_br.bin.gz --out manifest.json
+          --version "${{ inputs.version }}" --build-date "${{ inputs.build_date }}"
+
+      - name: Sign manifest (Ed25519)
+        env:
+          DRIVELENS_DATA_SIGNING_KEY: ${{ secrets.DRIVELENS_DATA_SIGNING_KEY }}
+        run: python3 -I sign_release.py sign --file manifest.json --out manifest.sig
+
+      - name: Verify signature against the published public key
+        run: python3 -I sign_release.py verify --file manifest.json --sig manifest.sig --pubkey public-keys/current.pub
+
+      - name: Publish GitHub Release "latest"
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          gh release delete latest --yes --cleanup-tag || true
+          gh release create latest tolls_br.bin.gz manifest.json manifest.sig \
+            --title "Toll dataset v${{ inputs.version }}" \
+            --notes "version ${{ inputs.version }}, built ${{ inputs.build_date }}" --latest

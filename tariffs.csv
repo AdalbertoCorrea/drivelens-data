@@ -1,0 +1,5 @@
+point_id,category,valid_from,amount_cents,source_url,source
+SYN-1,CAT_1,2026-01-01,1000,synthetic:dev-only,synthetic
+SYN-1,CAT_2,2026-01-01,2000,synthetic:dev-only,synthetic
+SYN-1,CAT_9,2026-01-01,500,synthetic:dev-only,synthetic
+SYN-2,CAT_1,2026-01-01,1500,synthetic:dev-only,synthetic
